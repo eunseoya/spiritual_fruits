@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap"
+    rel="stylesheet">
+  <title>Fruits of the Spirit</title>
+  <style>
+    body {
+      font-family: "Comic Neue", cursive, sans-serif;
+      background-color: white;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 500px;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .fruit-container {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin: 0 auto;
+      cursor: pointer;
+    }
+
+    .message {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      position: relative;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.3s, transform 0.3s;
+      display: none;
+      font-family: "Comic Neue", cursive, sans-serif;
+      font-size: 18px;
+    }
+
+    .message.show {
+      opacity: 1;
+      transform: translateY(0);
+      display: block;
+    }
+
+    .message::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 20px;
+      background-color: white;
+      transform-origin: center;
+      transform: translateX(-50%) rotate(45deg);
+      z-index: -1;
+    }
+
+    .instruction {
+      margin-top: 20px;
+      color: #666;
+    }
+
+    .try-again-btn {
+      padding: 10px 20px;
+      background-color: #d97706;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 20px;
+      display: none;
+      font-family: "Comic Neue", cursive, sans-serif;
+    }
+
+    .try-again-btn:hover {
+      background-color: #b45309;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .fruit-name {
+      margin-top: 10px;
+      font-weight: bold;
+      color: #e44c4c;
+      font-size: 18px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="message">
+      <p>Hi online students, wish you were with us! I hope that we can continue to learn and grow as long as we're
+        together. Praying that God will help us be fruitful :)</p>
+    </div>
+
+    <div class="fruit-container" id="fruitContainer">
+      <!-- SVG will be inserted here by JavaScript -->
+    </div>
+
+    <div class="fruit-name" id="fruitName"></div>
+
+    <p class="instruction" id="instruction">Click the fruit to see a message</p>
+    <button class="try-again-btn" id="tryAgainBtn">Try another fruit</button>
+  </div>
+
+  <script>
+    // The nine fruits of the spirit from Galatians 5:22-23 with corresponding fruits
+    const fruitsOfSpirit = [
+      {
+        name: "Love",
+        fruit: "Apple",
+        svg: (biteCircles = []) => `
+          <svg viewBox="0 0 100 100">
+            <!-- Apple -->
+            <circle cx="50" cy="55" r="35" fill="#e74c3c" />
+            <path d="M50,20 Q60,10 70,20 L50,30 Z" fill="#27ae60" />
+            <rect x="48" y="15" width="4" height="15" fill="#795548" />
+            ${biteCircles.map(circle =>
+          `<circle cx="${circle.x}" cy="${circle.y}" r="${circle.r}" fill="white" />`
+        ).join('')}
+          </svg>
+        `
+      },
+      {
+        name: "Joy",
+        fruit: "Orange",
+        svg: (biteCircles = []) => `
+          <svg viewBox="0 0 100 100">
+            <!-- Orange -->
+            <circle cx="50" cy="50" r="40" fill="#ffa502" />
+            <path d="M50,10 Q55,15 50,20 Q45,15 50,10" fill="#27ae60" />
+            ${biteCircles.map(circle =>
+          `<circle cx="${circle.x}" cy="${circle.y}" r="${circle.r}" fill="white" />`
+        ).join('')}
+          </svg>
+        `
+      },
+      {
+        name: "Peace",
+        fruit: "Pear",
+        svg: (biteCircles = []) => `
+          <svg viewBox="0 0 100 100">
+            <!-- Pear -->
+            <path d="M50,20 Q70,20 65,40 Q80,60 65,80 Q50,95 35,80 Q20,60 35,40 Q30,20 50,20" fill="#a5d6a7" />
+            <rect x="48" y="10" width="4" height="15" fill="#795548" />
+            ${biteCircles.map(circle =>
+          `<circle cx="${circle.x}" cy="${circle.y}" r="${circle.r}" fill="white" />`
+        ).join('')}
+          </svg>
+        `
+      },
+      {
+        name: "Patience",
+        fruit: "Grape",
+        svg: (biteCircles = []) => `
+          <svg viewBox="0 0 100 100">
+            <!-- Grape cluster -->
+            <circle cx="40" cy="40" r="15" fill="#9b59b6" />
+            <circle cx="60" cy="40" r="15" fill="#8e44ad" />
+            <circle cx="50" cy="60" r="15" fill="#9b59b6" />
+            <circle cx="30" cy="60" r="15" fill="#8e44ad" />
+            <circle cx="70" cy="60" r="15" fill="#9b59b6" />
+            <path d="M50,25 Q55,15 60,25" stroke="#27ae60" stroke-width="2" fill="none" />
+            ${biteCircles.map(circle =>
+          `<circle cx="${circle.x}" cy="${circle.y}" r="${circle.r}" fill="white" />`
+        ).join('')}
+          </svg>
+        `
+      },
+      {
+        name: "Kindness",
+        fruit: "Strawberry",
+        svg: (biteCircles = []) => `
+          <svg viewBox="0 0 100 100">
+            <!-- Strawberry -->
+            <path d="M50,30 Q70,30 70,60 Q60,85 50,85 Q40,85 30,60 Q30,30 50,30" fill="#e74c3c" />
+            <circle cx="40" cy="45" r="2" fill="#f1c40f" />
+            <circle cx="60" cy="45" r="2" fill="#f1c40f" />
+            <circle cx="50" cy="55" r="2" fill="#f1c40f" />
+            <circle cx="40" cy="65" r="2" fill="#f1c40f" />
+            <circle cx="60" cy="65" r="2" fill="#f1c40f" />
+            <path d="M50,30 Q55,20 60,15 Q50,15 40,15 Q45,20 50,30" fill="#27ae60" />
+            ${biteCircles.map(circle =>
+          `<circle cx="${circle.x}" cy="${circle.y}" r="${circle.r}" fill="white" />`
+        ).join('')}
+          </svg>
+        `
+      },
+      {
+        name: "Goodness",
+        fruit: "Cherry",
+        svg: (biteCircles = []) => `
+          <svg viewBox="0 0 100 100">
+            <!-- Cherry -->
+            <circle cx="40" cy="60" r="20" fill="#e74c3c" />
+            <circle cx="65" cy="55" r="20" fill="#c0392b" />
+            <path d="M40,60 Q45,40 50,30 Q55,40 65,55" fill="none" stroke="#795548" stroke-width="3" />
+            <path d="M50,30 Q55,20 60,25" stroke="#27ae60" stroke-width="2" fill="none" />
+            ${biteCircles.map(circle =>
+          `<circle cx="${circle.x}" cy="${circle.y}" r="${circle.r}" fill="white" />`
+        ).join('')}
+          </svg>
+        `
+      },
+      {
+        name: "Faithfulness",
+        fruit: "Watermelon",
+        svg: (biteCircles = []) => `
+          <svg viewBox="0 0 100 100">
+            <!-- Watermelon -->
+            <path d="M20,50 A30,30 0 0,1 80,50 A30,30 0 0,1 20,50" fill="#ff6b6b" />
+            <path d="M25,50 A25,25 0 0,1 75,50 A25,25 0 0,1 25,50" fill="#ff6b6b" />
+            <path d="M20,50 A30,30 0 0,1 80,50" fill="none" stroke="#2ecc71" stroke-width="5" />
+            <circle cx="35" cy="40" r="2" fill="black" />
+            <circle cx="45" cy="45" r="2" fill="black" />
+            <circle cx="55" cy="40" r="2" fill="black" />
+            <circle cx="65" cy="45" r="2" fill="black" />
+            <circle cx="40" cy="55" r="2" fill="black" />
+            <circle cx="50" cy="50" r="2" fill="black" />
+            <circle cx="60" cy="55" r="2" fill="black" />
+            ${biteCircles.map(circle =>
+          `<circle cx="${circle.x}" cy="${circle.y}" r="${circle.r}" fill="white" />`
+        ).join('')}
+          </svg>
+        `
+      },
+      {
+        name: "Gentleness",
+        fruit: "Peach",
+        svg: (biteCircles = []) => `
+          <svg viewBox="0 0 100 100">
+            <!-- Peach -->
+            <circle cx="50" cy="55" r="35" fill="#fab1a0" />
+            <path d="M50,20 Q55,15 60,20 L50,30 Z" fill="#27ae60" />
+            <rect x="48" y="15" width="4" height="15" fill="#795548" />
+            ${biteCircles.map(circle =>
+          `<circle cx="${circle.x}" cy="${circle.y}" r="${circle.r}" fill="white" />`
+        ).join('')}
+          </svg>
+        `
+      },
+      {
+        name: "Self-Control",
+        fruit: "Blueberry",
+        svg: (biteCircles = []) => `
+          <svg viewBox="0 0 100 100">
+            <!-- Blueberry -->
+            <circle cx="50" cy="50" r="30" fill="#3498db" />
+            <circle cx="45" cy="40" r="5" fill="#2980b9" opacity="0.3" />
+            <path d="M50,20 Q55,15 60,20" stroke="#27ae60" stroke-width="2" fill="none" />
+            ${biteCircles.map(circle =>
+          `<circle cx="${circle.x}" cy="${circle.y}" r="${circle.r}" fill="white" />`
+        ).join('')}
+          </svg>
+        `
+      }
+    ];
+
+    // DOM elements
+    const fruitContainer = document.getElementById('fruitContainer');
+    const message = document.querySelector('.message');
+    const instruction = document.getElementById('instruction');
+    const tryAgainBtn = document.getElementById('tryAgainBtn');
+    const fruitName = document.getElementById('fruitName');
+
+    // State variables
+    let selectedFruitIndex = null;
+    let showMessage = false;
+    let biteCircles = [];
+    const maxBites = 12;
+
+    // Fruit boundaries for each fruit type
+    const fruitBoundaries = [
+      {centerX: 50, centerY: 55, radius: 35}, // Apple
+      {centerX: 50, centerY: 50, radius: 40}, // Orange
+      {centerX: 50, centerY: 50, radius: 40}, // Pear 
+      {centerX: 50, centerY: 50, radius: 40}, // Grape 
+      {centerX: 50, centerY: 55, radius: 35}, // Strawberry
+      {centerX: 50, centerY: 55, radius: 25}, // Cherry 
+      {centerX: 50, centerY: 55, radius: 35}, // Watermelon
+      {centerX: 50, centerY: 55, radius: 35}, // Peach
+      {centerX: 50, centerY: 50, radius: 30}  // Blueberry
+    ];
+
+    // Initialize the page
+    function init() {
+      // Randomly select one of the nine fruits
+      selectedFruitIndex = Math.floor(Math.random() * fruitsOfSpirit.length);
+      renderFruit();
+
+      // Add event listeners
+      fruitContainer.addEventListener('click', handleFruitClick);
+      tryAgainBtn.addEventListener('click', tryAnotherFruit);
+    }
+
+    // Generate a random point on the edge of the fruit
+    function getRandomEdgePoint() {
+      const boundary = fruitBoundaries[selectedFruitIndex];
+
+      // Generate a random angle
+      const angle = Math.random() * 2 * Math.PI;
+
+      // Calculate point on the edge
+      const x = boundary.centerX + (boundary.radius - 5) * Math.cos(angle);
+      const y = boundary.centerY + (boundary.radius - 5) * Math.sin(angle);
+
+      // Random radius between 12 and 20
+      const radius = 12 + Math.random() * 8;
+
+      return {x, y, r: radius};
+    }
+
+    // Check if the fruit is completely covered
+    function isCompletelyHidden() {
+      // Simple approach: if we have enough bites, consider it hidden
+      return biteCircles.length >= maxBites;
+    }
+
+    // Render the current fruit
+    function renderFruit() {
+      const fruit = fruitsOfSpirit[selectedFruitIndex];
+      fruitContainer.innerHTML = fruit.svg(biteCircles);
+      document.getElementById('fruitName').textContent = fruit.name;
+    }
+
+    // Handle fruit click
+    function handleFruitClick() {
+      const soundPath = './bite.m4a';
+      const audio = new Audio(soundPath);
+      if (!showMessage) {
+        showMessage = true;
+        message.classList.add('show');
+        instruction.textContent = 'Click again to take a bite!';
+      } else if (!isCompletelyHidden()) {
+        audio.play();
+        // Check if this is the last bite
+        if (biteCircles.length === maxBites - 1) {
+          // Add a final bite that covers the entire fruit
+          const boundary = fruitBoundaries[selectedFruitIndex];
+          biteCircles.push({
+            x: boundary.centerX,
+            y: boundary.centerY,
+            r: boundary.radius * 1.5 // Make it larger than the fruit
+          });
+        } else {
+          // Add a new bite circle at a random edge point
+          biteCircles.push(getRandomEdgePoint());
+        }
+
+        renderFruit();
+
+        if (isCompletelyHidden()) {
+          // Fruit is gone
+          instruction.style.display = 'none';
+          tryAgainBtn.style.display = 'inline-block';
+        }
+      }
+    }
+
+    // Try another fruit
+    function tryAnotherFruit() {
+      // Reset state
+      biteCircles = [];
+      showMessage = false;
+      message.classList.remove('show');
+      instruction.style.display = 'block';
+      instruction.textContent = 'Click the fruit to see a message';
+      tryAgainBtn.style.display = 'none';
+
+      // Select a new random fruit
+      let newIndex;
+      do {
+        newIndex = Math.floor(Math.random() * fruitsOfSpirit.length);
+      } while (newIndex === selectedFruitIndex);
+      selectedFruitIndex = newIndex;
+
+      renderFruit();
+    }
+
+    // Initialize when the page loads
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+
+</html>
